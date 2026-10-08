@@ -1,0 +1,65 @@
+{
+  "name": "dsh-ungrouped-top",
+  "version": "1.0.0",
+  "description": "把 DSH 侧边栏的「未分组」钉在最上面，并让「新会话」默认落进无工作区会话。零依赖客户端插件。",
+  "type": "module",
+  "main": "./lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "cordis.patch.yml",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "cordis",
+    "cordis-plugin",
+    "plugin",
+    "sidebar",
+    "session",
+    "workspace",
+    "projectless",
+    "ungrouped"
+  ],
+  "license": "MIT",
+  "author": "wqzhellohhwy",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wqzhellohhwy/dsh-ungrouped-top.git"
+  },
+  "homepage": "https://github.com/wqzhellohhwy/dsh-ungrouped-top#readme",
+  "bugs": {
+    "url": "https://github.com/wqzhellohhwy/dsh-ungrouped-top/issues"
+  },
+  "engines": {
+    "node": ">=22.19"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": ">=4.0.0-rc <5",
+    "dsh-projectless-session": ">=0.6.0"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/cordis": {
+      "optional": true
+    },
+    "dsh-projectless-session": {
+      "optional": true
+    }
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [],
+      "platform": "web"
+    }
+  }
+}
