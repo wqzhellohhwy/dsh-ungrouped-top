@@ -55,12 +55,6 @@ dsh plugin --profile web add "link:D:/dsh-plugins/dsh-ungrouped-top"
 dsh plugin --profile web add github:wqzhellohhwy/dsh-ungrouped-top
 ```
 
-### 方式 C：从 npm 装
-
-```powershell
-dsh plugin --profile web add dsh-ungrouped-top
-```
-
 > 把 `--profile web` 换成你自己的 profile 名（桌面版通常是 `desktop`）。
 > 装完**重启 DSH**；桌面版重启后如果不生效，再按一次 `Ctrl+R` 刷新界面。
 
