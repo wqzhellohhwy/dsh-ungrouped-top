@@ -1,6 +1,6 @@
 {
   "name": "dsh-ungrouped-top",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "把 DSH 侧边栏的「未分组」钉在最上面，并让「新会话」默认落进无工作区会话。零依赖客户端插件。",
   "type": "module",
   "main": "./lib/index.js",
