@@ -124,6 +124,23 @@ DSH 的排序模式（视图选项里的「手动排序 / 最近更新」）是*
 | 标题重试（400ms × 5） | provider 改名会输给紧随其后的工作区列表刷新，标题会退化成目录名 |
 | 未分组顺序按时间序刷新 | 手动排序模式下「未分组」会冻结成固定顺序，不再「最新在上」 |
 
+### 自检上报
+
+Client 面在加载后（以及每次「新会话」被调用时）把自身状态 POST 给 Host 面注册的 `/api/ungrouped-top/diagnostics`，Host 以 JSONL 追加写到 `os.tmpdir()/dsh-ungrouped-top-diagnostics.json`：
+
+```json
+{"phase":"applied","providerFound":true,"wrapperInstalled":true,"orderBy":"manual","taggedTemporarySections":1}
+{"phase":"startSession","mode":"default","providerFound":true}
+```
+
+它不改变任何行为，只用来回答"插件到底有没有在工作"——因为"插件没加载""加载了但 provider 没找到""包装被换掉了"这三种情况，从 Host 侧看是一模一样的（插件都是 active）。不需要就关掉：
+
+```yaml
+- id: dsh-ungrouped-top
+  config:
+    diagnostics: false
+```
+
 ---
 
 ## 兼容性

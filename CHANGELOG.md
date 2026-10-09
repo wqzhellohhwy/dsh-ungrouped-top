@@ -2,6 +2,16 @@
 
 本项目遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## 1.2.2
+
+### 修复
+
+- **「新会话」被静默吞掉**：插件之前有一个"复用已打开的空白无工作区会话"的守卫——若存在这样一条会话，点「新会话」就只是把它切到前台，不再新建。这个判定只看"会话所属工作区的路径形状像不像 `…/YYYY-MM-DD/session-…`"，因此**用户自己建的、恰好指向这种目录的工作区**（例如把一个无工作区会话的目录正式加为工作区）会被误判，于是「新会话」永远只是切回那条旧会话，看起来像"没反应"或"又落回工作区"。该守卫已移除——它原本要防的连点重复创建，`inFlight` 锁已经覆盖。
+
+### 新增
+
+- **客户端自检上报**：Client 面会把自身状态（provider 是否找到、包装是否在位、排序模式、临时分组标记数）POST 给 Host 面新增的 `/api/ungrouped-top/diagnostics` 端点，Host 以 JSONL 追加写到 `os.tmpdir()/dsh-ungrouped-top-diagnostics.json`。这是为了从外部区分"插件没跑""跑了但没生效""生效了但 provider 没找到"——这三种情况在 Host 侧看起来完全一样。可通过 `config.diagnostics: false` 关闭，或用 `config.diagnosticsFile` 改路径。
+
 ## 1.2.1
 
 ### 修复
