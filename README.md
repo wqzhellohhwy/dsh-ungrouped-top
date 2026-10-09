@@ -28,6 +28,7 @@ DSH 的侧边栏有两个写死的行为，设置里没有开关：
 - **新会话默认无工作区**（需配合 [dsh-projectless-session](https://github.com/jarvisluk/dsh-projectless-session) 之类的 provider）：拦截无参数的「新会话」调用并转交给 provider；给某个工作区分组点「+」时仍在该工作区里新建。
 - **未分组始终「最近更新」在上**：DSH 的排序模式是全局的，而「未分组」是唯一会被写入「已保存顺序」的分组——一旦有了存下来的顺序，手动模式下它就冻结，而普通工作区仍按最近更新动态排列。插件持续把未分组的顺序刷新成当前的时间序，只动这一个账户，不碰任何工作区的顺序。
 - **临时分组标题校正**：provider 给临时工作区改名的那一步偶发会输给工作区列表刷新（结果分组标题退化成 `session-…` 目录名），插件会重试写回正确标题。
+- **临时分组改名抢跑 + 置顶**：临时工作区一出现在列表里就被改名（不等 provider 走完「建目录 → 建工作区 → 开会话」整轮），并在它存在期间排到「未分组」之上——新会话不会再顶着 `session-…` 的名字、出现在松散会话列表的下方。
 
 ## 它不做什么
 
@@ -104,6 +105,17 @@ DSH 的排序模式（视图选项里的「手动排序 / 最近更新」）是*
 
 > 代价：在未分组里手动拖拽排出的固定顺序会被下一次刷新覆盖。这是刻意的取舍——本插件的立场是"未分组永远最新在上"。
 
+### 临时工作区分组（抢名 + 置顶）
+
+无工作区会话在**发出第一条消息之前**必须借一个临时工作区落脚（DSH 不给没有工作区的会话完整界面）。provider 的流程是：建目录 → 注册临时工作区 → 开会话 → 改名 → 首条消息后注销注册。
+
+问题出在中间那段时间：临时工作区先是顶着目录名（`session-26-05-31-a1b2c3d4`）出现在侧边栏，而且排在「未分组」下面——看起来就像新建的会话跑错了地方。插件因此做两件事：
+
+- **抢名**：调用 provider 之前就订阅工作区列表，临时工作区一出现（标题仍等于目录名、路径形状匹配 `<root>/YYYY-MM-DD/session-…`）就立刻改名成 provider 的分组名，不等 provider 走完剩下几步。
+- **置顶**：给标题等于 provider 分组名的那个分组打上 `data-ungrouped-top-temp`，样式表据此把它排到「未分组」之上（`order:-2`）。
+
+两条规则都先核对路径形状与标题，因此不会误伤真实工作区；标记在插件卸载时清除。
+
 ### 护栏
 
 | 护栏 | 为什么需要 |
@@ -123,7 +135,7 @@ DSH 的排序模式（视图选项里的「手动排序 / 最近更新」）是*
 | 平台 | Windows / macOS / Linux —— 插件不触碰文件系统与平台 API |
 | profile | Web / Desktop（需要浏览器端 UI） |
 
-**关于 DSH 升级**：插件依赖三个 DSH 内部约定——侧边栏的 `[role="tree"]` + `data-row-key` 标记、`uiWorkspace.startSession` 的兜底链、以及 `sidebar.workspaces` 插槽注册上携带的视图存储（用于刷新未分组顺序）。DSH 大版本升级后如果失效，改的是这三处，改动量都很小。
+**关于 DSH 升级**：插件依赖三个 DSH 内部约定——侧边栏的 `[role="tree"]` + `data-row-key` 标记（临时分组置顶还要读分组行的标题文本）、`uiWorkspace.startSession` 的兜底链、以及 `sidebar.workspaces` 插槽注册上携带的视图存储（用于刷新未分组顺序）。DSH 大版本升级后如果失效，改的是这三处，改动量都很小。
 
 ---
 
@@ -154,7 +166,7 @@ dsh plugin --profile web remove dsh-ungrouped-top
 
 ```
 lib/index.js        Host 侧入口：空插件（只为让包成为一个完整的 DSH bundle）
-lib/client.js       Client 侧全部逻辑：样式注入 + startSession 包装 + 未分组顺序刷新
+lib/client.js       Client 侧全部逻辑：样式注入 + startSession 包装 + 未分组顺序刷新 + 临时分组抢名与置顶
 cordis.patch.yml    bundle patch：把本插件插入 loader
 package.json        包元数据 + dsh.bundle / dsh.client 声明
 ```
